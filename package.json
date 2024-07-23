@@ -19,7 +19,9 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "peer": "^1.0.2",
+    "sequelize": "^6.37.3",
     "socket.io": "^4.7.5",
+    "sqlite3": "^5.1.7",
     "uuid": "^10.0.0"
   },
   "devDependencies": {

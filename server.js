@@ -17,11 +17,10 @@
   const session = require("express-session")
   const e = require("express")
   const exp = require("constants")
+  const { User } = require('./models');
 
-  initializePassport(passport, 
-    username => { return users.find(user => user.username === username)},
-    id => { return users.find(user => user.id === id)}
-  )
+  initializePassport(passport)
+  
   // Set up PeerJS server
   const peerServer = ExpressPeerServer(server, {
     debug: true,
@@ -54,18 +53,13 @@
 })
 
   app.post("/register", async (req, res) => {
-    try{
-      
-      // hash password with random salt (no need to save salt it concats it to the password)
-      const hashedPassword = await bcrypt.hash(req.body.password, 10)
-  
-      const user = {id: Date.now(), username: req.body.username, password: hashedPassword}
-      users.push(user)
-      console.log(users)
-      res.redirect("/login")
-    }
-    catch {
-      res.redirect("/register")
+    try {
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
+      await User.create({ username: req.body.username, password: hashedPassword });
+      res.redirect("/login");
+    } catch (error) {
+      console.error(error);
+      res.redirect("/register");
     }
   
 })
