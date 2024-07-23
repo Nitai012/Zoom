@@ -82,7 +82,7 @@
 
   app.get("/:room", checkAuth, (req, res) => {
     const { room } = req.params
-    res.render("room", { roomId: room })
+    res.render("room", { roomId: room, userId: req.user.id})
   })
   io.on("connection", (socket) => {
     socket.on("join-room", (roomId, userId) => {
