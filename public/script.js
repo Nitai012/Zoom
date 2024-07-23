@@ -1,10 +1,11 @@
 const socket = io("/")
 const videoGrid = document.getElementById("video-grid")
 const myPeer = new Peer(undefined, {
-  host: "/",
-  port: "3001",
+  host: '/',
+  port: 3000,
+  path: '/peerjs',
+  secure: false, // set to true if using HTTPS
 })
-
 myPeer.on("open", (id) => {
   console.log("Peer opened with ID:", id)
   socket.emit("join-room", ROOM_ID, id)
@@ -42,6 +43,9 @@ navigator.mediaDevices
         connectToNewUser(userId, stream)
       }, 1000) // Delay to ensure the new user has fully connected
     })
+
+
+
   })
   .catch((error) => {
     console.error("Error accessing media devices:", error)
