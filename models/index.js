@@ -14,8 +14,14 @@ const User = sequelize.define('User', {
   password: {
     type: DataTypes.STRING,
     allowNull: false
+  },
+  roomId: {
+    type: DataTypes.STRING,
+    allowNull: true // Allow null if the user is not currently in a room
   }
 });
+
+
 
 sequelize.sync().then(() => {
   console.log('Database & tables created!');

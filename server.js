@@ -74,23 +74,37 @@
     failureFlash: true
   }))
 
-  
   app.get("/", checkAuth, (req, res) => {
-    const roomId = uuidV4()
-    res.redirect(`/${roomId}`)
+    res.render("home.ejs", {username: req.user.username})
   })
 
-  app.get("/:room", checkAuth, (req, res) => {
-    const { room } = req.params
+  app.get("/room", checkAuth, async (req, res) => {
+    if(await isInRoom(req.user.id) === true){
+      res.redirect("/")
+    }
+    else {
+    const roomId = uuidV4()
+    res.redirect(`/room/${roomId}`)
+    }
+  })
+
+  app.get("/room/:roomid", checkAuth, async (req, res) => {
+    if(await isInRoom(req.user.id) === true){
+      res.redirect("/")
+      return
+    }
+    const { room } = req.params.roomid;
     res.render("room", { roomId: room, userId: req.user.id})
   })
   io.on("connection", (socket) => {
     socket.on("join-room", (roomId, userId) => {
+      addToRoom(userId, roomId)
       console.log(`User ${userId} joined Room ${roomId}`)
       socket.join(roomId)
       socket.broadcast.to(roomId).emit("user-connected", userId)
       socket.on("disconnect", () => {
-        console.log("user disconnecting")
+        removeFromRoom(userId, roomId)
+        console.log(`User ${userId} disconnected Room ${roomId}`)
         socket.broadcast.to(roomId).emit("user-disconnected", userId)
       })
     })
@@ -102,6 +116,64 @@
       return next()
     }
     res.redirect("/login")
+  }
+
+  async function addToRoom(userId, roomId){
+    try {
+      // Find the user by userId
+      const user = await User.findByPk(userId);
+      
+      if (user) {
+        // Update the user's roomId
+        user.roomId = roomId;
+        await user.save();
+        console.log(`User ${userId} added to room ${roomId}`);
+      } else {
+        console.log(`User ${userId} not found`);
+      }
+    } catch (error) {
+      console.error('Error adding user to room:', error);
+    }
+  }
+
+  async function removeFromRoom(userId) {
+    try {
+      // Find the user by userId
+      const user = await User.findByPk(userId);
+      
+      if (user) {
+        // Clear the user's roomId
+        user.roomId = null;
+        await user.save();
+        console.log(`User ${userId} removed from room`);
+      } else {
+        console.log(`User ${userId} not found`);
+      }
+    } catch (error) {
+      console.error('Error removing user from room:', error);
+    }
+  }
+
+  async function isInRoom(userId){
+    try {
+      // Find the user by userId
+      const user = await User.findByPk(userId);
+      
+      if (user) {
+        if(user.roomId == null){
+          console.log(`User ${userId} not in room`);
+          return false
+        }
+        console.log(`User ${userId} found in room`);
+        return true
+      } else {
+        console.log(`User ${userId} not found`);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error adding user to room:', error);
+      return false;
+    }
   }
 
 
