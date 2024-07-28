@@ -1,24 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home</title>
-</head>
-<script src="js/home-script.js"></script>
-<body>
-  <div class="container">
-    <h2>Welcome to the Zoom Clone</h2>
-    <p>Hello, <%= username %>!</p>
-    <button onclick="startNewRoom()">Start a New Room</button>
-    <br><br>
-    <form id="joinRoomForm" method="GET" onsubmit="joinRoom(event)">
-        <label for="roomId">Enter Room ID:</label>
-        <input type="text" id="roomId" name="roomId" required>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="stylesheet" href="/css/home.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h2>Welcome, <%= username %></h2>
+
+      <h3>Create Room</h3>
+      <form id="create-room-form">
+        <div class="form-group">
+          <label for="password">Room Password</label>
+          <input type="password" id="password" name="password" />
+        </div>
+        <button type="submit">Create Room</button>
+      </form>
+
+      <h3>Join Room</h3>
+      <form id="join-room-form">
+        <div class="form-group">
+          <label for="roomId">Room ID</label>
+          <input type="text" id="roomId" name="roomId" required />
+        </div>
+        <div class="form-group">
+          <label for="joinPassword">Room Password</label>
+          <input type="password" id="joinPassword" name="password" />
+        </div>
         <button type="submit">Join Room</button>
       </form>
-  </div>
+    </div>
 
-  
-</body>
+    <script src="/js/home-script.js"></script>
+  </body>
 </html>
