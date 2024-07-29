@@ -23,6 +23,12 @@ const peerServer = PeerServer({
   port: 3001,
   path: '/peerjs',
 })
+
+// TODO:
+// remove valid room ids when nobody is in it
+// use database instead of list
+
+
 const validRoomIds = []
 const rooms = {} // Dictionary to store roomId and hashed password
 
@@ -77,7 +83,9 @@ app.get("/", checkAuth, (req, res) =>
 
 app.post("/room", checkAuth, async (req, res) => {
   try {
-    
+    if(await isInRoom(req.user.id)){
+      return res.redirect("/")
+    }
     const { password } = req.body
     const roomId = uuidV4()
     validRoomIds.push(roomId)
@@ -89,48 +97,36 @@ app.post("/room", checkAuth, async (req, res) => {
       rooms[roomId] = null // No password for this room
     }
 
-    res.redirect(`/room/${roomId}`)
+    res.redirect(`/room/${roomId}?password=${encodeURIComponent(password || "")}`);
   } catch (error) {
     console.error("Error creating room:", error)
     res.status(500).send("Internal Server Error")
-  }
-})
+  }})
 
-app.post("/join-room", checkAuth, async (req, res) => {
-  try {
-    const { roomId, password } = req.body
-
-    if (!validRoomIds.includes(roomId)) {
-      return res.status(403).send("Forbidden: Invalid Room ID")
-    }
-
-    const hashedPassword = rooms[roomId]
-
-    if (hashedPassword === null) {
-      // Room doesn't have a password
-      res.redirect(`/room/${roomId}`)
-    } else {
-      // Room has a password, check if it's correct
-      const isPasswordValid = await bcrypt.compare(password, hashedPassword)
-      if (isPasswordValid) {
-        res.redirect(`/room/${roomId}`)
-      } else {
-        res.status(403).send("Forbidden: Incorrect Password")
-      }
-    }
-  } catch (error) {
-    console.error("Error joining room:", error)
-    res.status(500).send("Internal Server Error")
-  }
-})
 
 app.get("/room/:roomid", checkAuth, async (req, res) => {
   try {
-    const roomId = req.params.roomid
-    if (!validRoomIds.includes(roomId)) {
-      return res.status(403).send("Forbidden: Invalid Room ID")
+    if(await isInRoom(req.user.id)){
+      return res.redirect("/")
     }
+    const roomId = req.params.roomid
+    const { password } = req.query
+    if (!validRoomIds.includes(roomId)) {
+      return res.status(403).send("Forbidden: Wrong ID or Password")
+    }
+    // room is valid
+    const hashedPassword = rooms[roomId]
+    if (hashedPassword) { // there is a password
+      isPasswordValid = false
+      if(password){
+        isPasswordValid = await bcrypt.compare(password, hashedPassword)
+      }
+      if (!isPasswordValid) {
+        return res.status(403).send("Forbidden: Wrong ID or Password")
+      }
+    } 
     res.render("room", { roomId: roomId, userId: req.user.id })
+
   } catch (error) {
     console.error("Error accessing room:", error)
     res.status(500).send("Internal Server Error")
@@ -141,6 +137,7 @@ io.on("connection", (socket) => {
   socket.on("join-room", (roomId, userId) => {
     try {
       addToRoom(userId, roomId)
+      // ++ to roomId database entry or add database entry if not in database
       console.log(`User ${userId} joined Room ${roomId}`)
       socket.join(roomId)
       socket.broadcast.to(roomId).emit("user-connected", userId)
@@ -148,6 +145,7 @@ io.on("connection", (socket) => {
       socket.on("disconnect", () => {
         try {
           removeFromRoom(userId, roomId)
+          // -- to roomId database entry or delete database entry if going to be 0
           console.log(`User ${userId} disconnected from Room ${roomId}`)
           socket.broadcast.to(roomId).emit("user-disconnected", userId)
         } catch (error) {

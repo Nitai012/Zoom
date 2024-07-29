@@ -24,10 +24,8 @@ document
     const roomId = document.getElementById("roomId").value
     const password = document.getElementById("joinPassword").value || null // Use null if empty
 
-    const response = await fetch("/join-room", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roomId, password }),
+    const response = await fetch("/room/" + roomId + "?password=" + password, {
+      method: "GET",
     })
 
     if (response.ok) {
