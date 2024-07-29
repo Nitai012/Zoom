@@ -3,13 +3,13 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express")
-const cors = require("cors")
+//const cors = require("cors")
 const app = express()
 const server = require("http").Server(app)
 const io = require("socket.io")(server)
 const { v4: uuidV4 } = require("uuid")
 const bcrypt = require("bcrypt")
-const { ExpressPeerServer } = require("peer")
+const { PeerServer } = require("peer")
 const passport = require("passport")
 const initializePassport = require("./passport-config")
 const { exec } = require("child_process")
@@ -19,13 +19,16 @@ const { User } = require("./models")
 
 initializePassport(passport)
 
-const peerServer = ExpressPeerServer(server, { debug: true })
+const peerServer = PeerServer({
+  port: 3001,
+  path: '/peerjs',
+})
 const validRoomIds = []
 const rooms = {} // Dictionary to store roomId and hashed password
 
-app.use(cors())
+//app.use(cors())
 app.set("view engine", "ejs")
-app.use("/peerjs", peerServer)
+//app.use("/peerjs", peerServer)
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -66,19 +69,19 @@ app.post(
   })
 )
 
-app.get("/", checkAuth, (req, res) =>
+app.get("/", checkAuth, (req, res) => 
   res.render("home.ejs", { username: req.user.username })
 )
 
-app.get("/room", checkAuth, (req, res) =>
-  res.render("home.ejs", { username: req.user.username, creatingRoom: true })
-)
+
 
 app.post("/room", checkAuth, async (req, res) => {
   try {
+    
     const { password } = req.body
     const roomId = uuidV4()
     validRoomIds.push(roomId)
+    console.log(`User ${req.user.id} started Room ${roomId}`)
 
     if (password) {
       rooms[roomId] = await bcrypt.hash(password, 10) // Store hashed password
@@ -127,7 +130,7 @@ app.get("/room/:roomid", checkAuth, async (req, res) => {
     if (!validRoomIds.includes(roomId)) {
       return res.status(403).send("Forbidden: Invalid Room ID")
     }
-    res.render("room", { roomId, userId: req.user.id })
+    res.render("room", { roomId: roomId, userId: req.user.id })
   } catch (error) {
     console.error("Error accessing room:", error)
     res.status(500).send("Internal Server Error")

@@ -1,7 +1,9 @@
+const ROOM_ID = "<%= roomId %>"
+const USER_ID = "<%= userId %>"
 const socket = io("/")
 const videoGrid = document.getElementById("video-grid")
 const myPeer = new Peer(USER_ID, {
-  host: "/",
+  host: '/',
   port: 3000,
   path: "/peerjs",
   secure: false, // set to true if using HTTPS

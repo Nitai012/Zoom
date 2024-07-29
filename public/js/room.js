@@ -1,8 +1,10 @@
+
+console.log(USER_ID, ROOM_ID)
 const socket = io("/")
 const videoGrid = document.getElementById("video-grid")
-const myPeer = new Peer("<%= userId %>", {
+const myPeer = new Peer(USER_ID, {
   host: "/",
-  port: 3000,
+  port: 3001,
   path: "/peerjs",
   secure: false,
 })
@@ -25,9 +27,11 @@ navigator.mediaDevices
         addVideoStream(video, userVideoStream)
       })
     })
-
+      
     socket.on("user-connected", (userId) => {
-      connectToNewUser(userId, stream)
+      setTimeout(() => {
+        connectToNewUser(userId, stream)
+      }, 1000)
     })
   })
 
@@ -36,7 +40,7 @@ socket.on("user-disconnected", (userId) => {
 })
 
 myPeer.on("open", (id) => {
-  socket.emit("join-room", "<%= roomId %>", id)
+  socket.emit("join-room", ROOM_ID, id)
 })
 
 function connectToNewUser(userId, stream) {
