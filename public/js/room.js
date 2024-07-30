@@ -1,4 +1,3 @@
-
 console.log(USER_ID, ROOM_ID)
 const socket = io("/")
 const videoGrid = document.getElementById("video-grid")
@@ -27,11 +26,11 @@ navigator.mediaDevices
         addVideoStream(video, userVideoStream)
       })
     })
-      
+
     socket.on("user-connected", (userId) => {
       setTimeout(() => {
         connectToNewUser(userId, stream)
-      }, 1000)
+      }, 3500)
     })
   })
 
