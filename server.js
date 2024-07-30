@@ -16,20 +16,20 @@ const { exec } = require("child_process")
 const flash = require("express-flash")
 const session = require("express-session")
 const { User } = require("./models")
+const { Rooms } = require("./models")
 
 initializePassport(passport)
 
 const peerServer = PeerServer({
   port: 3001,
-  path: '/peerjs',
+  path: "/peerjs",
 })
 
 // TODO:
 // remove valid room ids when nobody is in it
 // use database instead of list
 
-
-const validRoomIds = []
+// const validRoomIds = []
 const rooms = {} // Dictionary to store roomId and hashed password
 
 //app.use(cors())
@@ -75,21 +75,19 @@ app.post(
   })
 )
 
-app.get("/", checkAuth, (req, res) => 
+app.get("/", checkAuth, (req, res) =>
   res.render("home.ejs", { username: req.user.username })
 )
 
-
-
 app.post("/room", checkAuth, async (req, res) => {
   try {
-    if(await isInRoom(req.user.id)){
+    if (await isInRoom(req.body.username)) {
       return res.redirect("/")
     }
     const { password } = req.body
     const roomId = uuidV4()
-    validRoomIds.push(roomId)
-    console.log(`User ${req.user.id} started Room ${roomId}`)
+    await Rooms.create({ roomId: roomId, password: password, NumberOfUsers: 0 })
+    console.log(`User ${req.user.username} started Room ${roomId}`)
 
     if (password) {
       rooms[roomId] = await bcrypt.hash(password, 10) // Store hashed password
@@ -97,36 +95,39 @@ app.post("/room", checkAuth, async (req, res) => {
       rooms[roomId] = null // No password for this room
     }
 
-    res.redirect(`/room/${roomId}?password=${encodeURIComponent(password || "")}`);
+    res.redirect(
+      `/room/${roomId}?password=${encodeURIComponent(password || "")}`
+    )
   } catch (error) {
     console.error("Error creating room:", error)
     res.status(500).send("Internal Server Error")
-  }})
-
+  }
+})
 
 app.get("/room/:roomid", checkAuth, async (req, res) => {
   try {
-    if(await isInRoom(req.user.id)){
+    if (await isInRoom(req.user.username)) {
       return res.redirect("/")
     }
     const roomId = req.params.roomid
     const { password } = req.query
-    if (!validRoomIds.includes(roomId)) {
+    const room = await Rooms.findOne({ where: { roomId: roomId } })
+    if (!room) {
       return res.status(403).send("Forbidden: Wrong ID or Password")
     }
     // room is valid
     const hashedPassword = rooms[roomId]
-    if (hashedPassword) { // there is a password
+    if (hashedPassword) {
+      // there is a password
       isPasswordValid = false
-      if(password){
+      if (password) {
         isPasswordValid = await bcrypt.compare(password, hashedPassword)
       }
       if (!isPasswordValid) {
         return res.status(403).send("Forbidden: Wrong ID or Password")
       }
-    } 
-    res.render("room", { roomId: roomId, userId: req.user.id })
-
+    }
+    res.render("room", { roomId: roomId, userId: req.user.username })
   } catch (error) {
     console.error("Error accessing room:", error)
     res.status(500).send("Internal Server Error")
@@ -172,6 +173,12 @@ async function addToRoom(userId, roomId) {
       user.roomId = roomId
       await user.save()
       console.log(`User ${userId} added to room ${roomId}`)
+      const room = await Rooms.findOne({ where: { roomId: roomId } })
+      if (room) {
+        room.NumberOfUsers++
+        console.log(`Room ${roomId} has ${room.NumberOfUsers} users`)
+        await room.save()
+      }
     } else {
       console.log(`User ${userId} not found`)
     }
@@ -187,6 +194,13 @@ async function removeFromRoom(userId, roomId) {
       user.roomId = null
       await user.save()
       console.log(`User ${userId} removed from room`)
+      const room = await Rooms.findOne({ where: { roomId: roomId } })
+      if (room) {
+        room.NumberOfUsers--
+        console.log(`Room ${roomId} has ${room.NumberOfUsers} users`)
+        await room.save()
+        await Rooms.destroy({ where: { roomId: roomId, NumberOfUsers: 0 } })
+      }
     } else {
       console.log(`User ${userId} not found`)
     }

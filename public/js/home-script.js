@@ -3,11 +3,12 @@ document
   .addEventListener("submit", async (e) => {
     e.preventDefault()
     const password = document.getElementById("password").value || null // Use null if empty
-
+    const username = USER_ID
+    console.log(username)
     const response = await fetch("/room", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ password, username }),
     })
 
     if (response.ok) {
