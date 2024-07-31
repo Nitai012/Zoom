@@ -81,7 +81,7 @@ app.get("/", checkAuth, (req, res) =>
 
 app.post("/room", checkAuth, async (req, res) => {
   try {
-    if (await isInRoom(req.body.username)) {
+    if (await isInRoom(req.user.username)) {
       return res.redirect("/")
     }
     const { password } = req.body

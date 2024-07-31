@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Room</title>
+    <title>RoomChkes</title>
+    <link rel="icon" href="/img/logo2.svg" type="image/icon type" />
     <link rel="stylesheet" href="/css/room.css" />
   </head>
   <script>
@@ -11,11 +12,13 @@
     const USER_ID = "<%= userId %>"
   </script>
   <body>
-    
     <div id="video-grid"></div>
 
     <script src="/socket.io/socket.io.js" defer></script>
-    <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js" defer></script>
+    <script
+      src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"
+      defer
+    ></script>
     <script src="/js/room.js" defer></script>
   </body>
 </html>

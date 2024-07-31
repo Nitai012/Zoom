@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Home</title>
+    <title>HomeChkes</title>
+    <link rel="icon" href="/img/logo2.svg" type="image/icon type" />
     <link rel="stylesheet" href="/css/home.css" />
   </head>
   <script>
@@ -11,29 +12,29 @@
   </script>
   <body>
     <div name="logo">
-      <img src="/img/logo2.svg" style="width: 5%; height: auto;"/>
+      <img id="logo2" src="/img/logo2.svg" />
       <img id="logo" src="/img/logo.png" />
     </div>
     <div class="container">
       <h2>Welcome, <%= username %></h2>
 
-      <h3>Create Room</h3>
+      <h3>RoomChkes</h3>
       <form id="create-room-form">
         <div class="form-group">
-          <label for="password">Room Password</label>
+          <label for="password">RoomChkes Password</label>
           <input type="password" id="password" name="password" />
         </div>
-        <button type="submit">Create Room</button>
+        <button type="submit">Create RoomChkes</button>
       </form>
 
-      <h3>Join Room</h3>
+      <h3>Join RoomChkes</h3>
       <form id="join-room-form">
         <div class="form-group">
-          <label for="roomId">Room ID</label>
+          <label for="roomId">RoomChkes ID</label>
           <input type="text" id="roomId" name="roomId" required />
         </div>
         <div class="form-group">
-          <label for="joinPassword">Room Password</label>
+          <label for="joinPassword">RoomChkes Password</label>
           <input type="password" id="joinPassword" name="password" />
         </div>
         <button type="submit">Join Room</button>

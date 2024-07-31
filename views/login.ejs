@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
     <link rel="stylesheet" href="/css/login.css" />
+    <link rel="icon" href="/img/logo2.svg" type="image/icon type" />
   </head>
   <body>
     <% if (message.error) { %> <%= message.error %> <% } %>
     <div class="container">
-      <h2>Login</h2>
+      <h2>LoginChkes</h2>
       <form action="/login" method="POST">
         <div class="form-group">
           <label for="username">Username</label>
@@ -23,5 +24,6 @@
         <p>Don't have an account? <a href="/register">Register here</a></p>
       </form>
     </div>
+    <img src="/img/logo2.svg" alt="" />
   </body>
 </html>
