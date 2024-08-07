@@ -2,10 +2,10 @@ console.log(USER_ID, ROOM_ID)
 const socket = io("/")
 const videoGrid = document.getElementById("video-grid")
 const myPeer = new Peer(USER_ID, {
-  host: "/",
-  port: 3001,
-  path: "/peerjs",
-  secure: false,
+  host: "0.peerjs.com",
+  port: 443,
+  path: "/",
+  secure: true,
 })
 const myVideo = document.createElement("video")
 myVideo.muted = true
@@ -35,6 +35,7 @@ navigator.mediaDevices
   })
 
 socket.on("user-disconnected", (userId) => {
+  console.log("GEOGKEOGKEGOkg")
   if (peers[userId]) peers[userId].close()
 })
 

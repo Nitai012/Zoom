@@ -17,12 +17,18 @@ const flash = require("express-flash")
 const session = require("express-session")
 const { User } = require("./models")
 const { Rooms } = require("./models")
+const fs = require('fs');
 
 initializePassport(passport)
 
 const peerServer = PeerServer({
-  port: 3001,
+  port: 443,
   path: "/peerjs",
+  ssl: {
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }
+  
 })
 
 // TODO:
@@ -135,6 +141,7 @@ app.get("/room/:roomid", checkAuth, async (req, res) => {
 })
 
 io.on("connection", (socket) => {
+  console.log("GOT CONNECTION")
   socket.on("join-room", (roomId, userId) => {
     try {
       addToRoom(userId, roomId)
